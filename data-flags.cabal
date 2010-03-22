@@ -17,7 +17,7 @@ Cabal-Version: >= 1.6.0
 Build-Type: Simple
 
 Library
-  Build-Depends: base >= 4, template-haskell
+  Build-Depends: base == 4.*, template-haskell
   Extensions: TemplateHaskell
   Hs-Source-Dirs: src
   GHC-Options: -Wall
