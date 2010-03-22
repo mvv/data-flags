@@ -9,7 +9,7 @@ module Data.Flags (
 
     containsAll, (.<=.), (.>=.),
     containsSome, (.~.),
-    containsNone, (.!~.),
+    containsNone, (./~.),
   ) where
 
 import Data.Bits ()
@@ -20,7 +20,7 @@ import Foreign.C.Types (CChar, CSChar, CUChar, CShort, CUShort, CInt, CUInt,
                         CLong, CULong, CLLong, CULLong)
 import Data.Flags.TH
 
-infixl 8 .<=., .>=., `containsAll`, .~., `containsSome`, .!~., `containsNone`
+infixl 8 .<=., .>=., `containsAll`, .~., `containsSome`, ./~., `containsNone`
 infixl 7 .-., `butFlags`
 infixl 6 .+., `andFlags`
 infixl 5 .*., `commonFlags`
@@ -66,8 +66,8 @@ containsSome flags subflags = flags .*. subflags /= noFlags
 containsNone :: Flags a => a -> a -> Bool
 containsNone flags subflags = flags .*. subflags == noFlags
 
-(.!~.) :: Flags a => a -> a -> Bool
-(.!~.) = containsNone
+(./~.) :: Flags a => a -> a -> Bool
+(./~.) = containsNone
 
 $(dataBitsAsFlags ''Integer)
 $(dataBitsAsBoundedFlags ''Int)
