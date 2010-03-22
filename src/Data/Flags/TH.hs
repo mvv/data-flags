@@ -1,5 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
+-- | Template Haskell utils for declaring flags instances.
 module Data.Flags.TH (
     dataBitsAsFlags,
     dataBitsAsBoundedFlags
@@ -16,6 +17,8 @@ inst name typeName = InstanceD [] (AppT (ConT $ mkName name) (ConT typeName))
 fun :: String -> Exp -> Dec
 fun name expr = FunD (mkName name) [Clause [] (NormalB expr) []]
 
+-- | Produces a 'Data.Flags.Flags' instance declaration for the specified
+--   instance of 'Data.Bits.Bits'.
 dataBitsAsFlags :: Name -> Q [Dec]
 dataBitsAsFlags typeName = do
   noneE <- [| fromInteger 0 |]
@@ -28,6 +31,8 @@ dataBitsAsFlags typeName = do
              fun "commonFlags" intersectionE,
              fun "butFlags" differenceE]]
 
+-- | Produces 'Data.Flags.Flags' and 'Data.Flags.BoundedFlags' instances
+--   declarations for the specified instance of 'Data.Bits.Bits'.
 dataBitsAsBoundedFlags :: Name -> Q [Dec]
 dataBitsAsBoundedFlags typeName = do
   allE <- [| fromInteger (-1) |]
