@@ -11,7 +11,7 @@ import Language.Haskell.TH
 
 import Data.Bits (Bits(..))
 import Data.Maybe (isJust)
-import Data.List (find, intercalate)
+import Data.List (find, union, intercalate)
 import Control.Applicative ((<$>))
 
 import Data.Flags.Base
@@ -63,7 +63,7 @@ bitmaskWrapper typeNameS wrappedName derives elems = do
                                      elems)) ++ "]" |]
   return $ [NewtypeD [] typeName []
                         (NormalC typeName [(NotStrict, ConT wrappedName)]) 
-                        (''Eq : ''Flags : derives)] ++
+                        (union [''Eq, ''Flags] derives)] ++
            (concatMap (\(nameS, value) ->
                          let name = mkName nameS in 
                            [SigD name (ConT typeName),
