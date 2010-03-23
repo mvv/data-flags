@@ -26,25 +26,26 @@ fun name expr = FunD name [Clause [] (NormalB expr) []]
 --   instance of 'Data.Bits.Bits'.
 dataBitsAsFlags :: Name -> Q [Dec]
 dataBitsAsFlags typeName = do
-  noneE <- [| fromInteger 0 |]
-  unionE <- [| (.|.) |]
-  intersectionE <- [| (.&.) |] 
-  differenceE <- [| \x -> \y -> x .&. (complement y) |]
+  noFlagsE <- [| fromInteger 0 |]
+  andFlagsE <- [| (.|.) |]
+  commonFlagsE <- [| (.&.) |] 
+  butFlagsE <- [| \x -> \y -> x .&. (complement y) |]
   return [inst ''Flags typeName
-            [fun 'noFlags noneE,
-             fun 'andFlags unionE,
-             fun 'commonFlags intersectionE,
-             fun 'butFlags differenceE]]
+            [fun 'noFlags noFlagsE,
+             fun 'andFlags andFlagsE,
+             fun 'commonFlags commonFlagsE,
+             fun 'butFlags butFlagsE]]
 
 -- | Produces 'Data.Flags.Base.Flags' and 'Data.Flags.Base.BoundedFlags'
 --   instances declarations for the specified instance of 'Data.Bits.Bits'.
 dataBitsAsBoundedFlags :: Name -> Q [Dec]
 dataBitsAsBoundedFlags typeName = do
-  allE <- [| fromInteger (-1) |]
-  enumE <- [| \x -> map (setBit 0) $ filter (testBit x) [0 .. bitSize x - 1] |]
+  allFlagsE <- [| fromInteger (-1) |]
+  enumFlagsE <- [| \x -> map (setBit 0) $
+                           filter (testBit x) [0 .. bitSize x - 1] |]
   (++ [inst ''BoundedFlags typeName
-         [fun 'allFlags allE,
-          fun 'enumFlags enumE]]) <$> dataBitsAsFlags typeName
+         [fun 'allFlags allFlagsE,
+          fun 'enumFlags enumFlagsE]]) <$> dataBitsAsFlags typeName
   
 bitmaskWrapper :: String -- ^ Wrapping type name
                -> Name -- ^ Wrapped type name
