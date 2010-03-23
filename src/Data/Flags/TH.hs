@@ -62,7 +62,7 @@ bitmaskWrapper :: String -- ^ Wrapping type name.
                -> Q [Dec]
 bitmaskWrapper typeNameS wrappedName derives bounded elems = do
   typeName <- return $ mkName typeNameS
-  showE <- [| \flags -> $(stringE typeNameS) ++ " [" ++
+  showE <- [| \flags -> $(stringE $ typeNameS ++ " [") ++
                         (intercalate ", " $ map snd $
                            filter ((noFlags /=) . commonFlags flags . fst) $
                              $(listE $
