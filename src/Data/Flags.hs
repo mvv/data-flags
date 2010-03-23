@@ -17,6 +17,16 @@
 -- > f :: MyFlags -> IO ()
 -- > f = ...
 --
+--   Or, using Template Haskell:
+--
+-- > import Data.Flags.TH
+-- >
+-- > $(bitmaskWrapper "MyFlags" ''CInt [] False
+-- >     [("myFlag1", #{const C_FLAG1}),
+-- >      ("myFlag2", #{const C_FLAG2}),
+-- >      ("myFlag3", #{const C_FLAG3})])
+-- >
+--
 --   And then use it like this:
 --
 -- > f $ myFlag1 .+. myFlag3

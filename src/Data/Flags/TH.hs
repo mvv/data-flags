@@ -47,11 +47,18 @@ dataBitsAsBoundedFlags typeName = do
          [fun 'allFlags allFlagsE,
           fun 'enumFlags enumFlagsE]]) <$> dataBitsAsFlags typeName
   
-bitmaskWrapper :: String -- ^ Wrapping type name
-               -> Name -- ^ Wrapped type name
-               -> [Name] -- ^ Types to derive automatically
-               -> Bool -- ^ Whether to declare BoundedFlags instance
-               -> [(String, Integer)] -- ^ Individual flags
+-- | Declare a newtype wrapper around the specified integral type and make
+--   the wrapper an instance of 'Data.Flags.Base.Flags' (and optionally
+--   'Data.Flags.Base.BoundedFlags'). For each individual flag declare
+--   a constant.  If a 'Show' instance wasn't requested for automatic
+--   derivation, declare one with
+--
+--   > show flags = "WrappingTypeName [IndividualFlags in flags]"
+bitmaskWrapper :: String -- ^ Wrapping type name.
+               -> Name -- ^ Wrapped type name.
+               -> [Name] -- ^ Types to derive automatically.
+               -> Bool -- ^ Whether to declare BoundedFlags instance.
+               -> [(String, Integer)] -- ^ Individual flags.
                -> Q [Dec]
 bitmaskWrapper typeNameS wrappedName derives bounded elems = do
   typeName <- return $ mkName typeNameS
