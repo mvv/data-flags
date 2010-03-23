@@ -14,11 +14,13 @@ import Data.Maybe (isJust)
 import Data.List (find, intercalate)
 import Control.Applicative ((<$>))
 
-inst :: String -> Name -> [Dec] -> Dec
-inst name typeName = InstanceD [] (AppT (ConT $ mkName name) (ConT typeName))
+import Data.Flags.Base
 
-fun :: String -> Exp -> Dec
-fun name expr = FunD (mkName name) [Clause [] (NormalB expr) []]
+inst :: Name -> Name -> [Dec] -> Dec
+inst name typeName = InstanceD [] (AppT (ConT name) (ConT typeName))
+
+fun :: Name -> Exp -> Dec
+fun name expr = FunD name [Clause [] (NormalB expr) []]
 
 -- | Produces a 'Data.Flags.Flags' instance declaration for the specified
 --   instance of 'Data.Bits.Bits'.
@@ -28,11 +30,11 @@ dataBitsAsFlags typeName = do
   unionE <- [| (.|.) |]
   intersectionE <- [| (.&.) |] 
   differenceE <- [| \x -> \y -> x .&. (complement y) |]
-  return [inst "Flags" typeName
-            [fun "noFlags" noneE,
-             fun "andFlags" unionE,
-             fun "commonFlags" intersectionE,
-             fun "butFlags" differenceE]]
+  return [inst ''Flags typeName
+            [fun 'noFlags noneE,
+             fun 'andFlags unionE,
+             fun 'commonFlags intersectionE,
+             fun 'butFlags differenceE]]
 
 -- | Produces 'Data.Flags.Flags' and 'Data.Flags.BoundedFlags' instances
 --   declarations for the specified instance of 'Data.Bits.Bits'.
@@ -40,9 +42,9 @@ dataBitsAsBoundedFlags :: Name -> Q [Dec]
 dataBitsAsBoundedFlags typeName = do
   allE <- [| fromInteger (-1) |]
   enumE <- [| \x -> map (setBit 0) $ filter (testBit x) [0 .. bitSize x - 1] |]
-  (++ [inst "BoundedFlags" typeName
-         [fun "allFlags" allE,
-          fun "enumFlags" enumE]]) <$> dataBitsAsFlags typeName
+  (++ [inst ''BoundedFlags typeName
+         [fun 'allFlags allE,
+          fun 'enumFlags enumE]]) <$> dataBitsAsFlags typeName
   
 bitmaskWrapper :: String -- ^ Wrapping type name
                -> Name -- ^ Wrapped type name
@@ -53,18 +55,15 @@ bitmaskWrapper typeNameS wrappedName derives elems = do
   typeName <- return $ mkName typeNameS
   showE <- [| \flags -> $(stringE typeNameS) ++ " [" ++
                         (intercalate ", " $ map snd $
-                           filter (\(flag, _) ->
-                                     $(varE $ mkName "containsAll")
-                                       flags flag) $
+                           filter ((noFlags /=) . commonFlags flags . fst) $
                              $(listE $
                                  map (\(name, _) ->
                                         tupE [varE $ mkName name,
                                               stringE name])
                                      elems)) ++ "]" |]
-  
   return $ [NewtypeD [] typeName []
                         (NormalC typeName [(NotStrict, ConT wrappedName)]) 
-                        (mkName "Eq" : mkName "Flags" : derives)] ++
+                        (''Eq : ''Flags : derives)] ++
            (concatMap (\(nameS, value) ->
                          let name = mkName nameS in 
                            [SigD name (ConT typeName),
@@ -73,8 +72,7 @@ bitmaskWrapper typeNameS wrappedName derives elems = do
                                             AppE (ConE typeName)
                                                  (LitE $ IntegerL value))
                                       []]]) elems) ++
-           (if (isJust $ find (("Show" ==) . show) derives)
+           (if (isJust $ find (''Show ==) derives)
               then []
-              else [inst "Show" typeName
-                      [fun "show" showE]])
+              else [inst ''Show typeName [fun 'show showE]])
 

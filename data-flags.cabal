@@ -24,4 +24,6 @@ Library
   Exposed-Modules:
     Data.Flags
     Data.Flags.TH
+  Other-Modules:
+    Data.Flags.Base
 

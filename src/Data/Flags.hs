@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_ghc -fno-warn-orphans #-}
 
 -- | This module provides type classes for working with sets of flags.
 --   In particular, with wrappers around bit masks:
@@ -38,23 +39,13 @@ import Foreign.Ptr (IntPtr, WordPtr)
 import Foreign.C.Types (CChar, CSChar, CUChar, CShort, CUShort, CInt, CUInt,
                         CLong, CULong, CLLong, CULLong)
 
+import Data.Flags.Base
 import Data.Flags.TH
 
 infixl 8 .<=., .>=., `containsAll`, .~., `containsSome`, ./~., `containsNone`
-infixl 7 .-., `butFlags`
-infixl 6 .+., `andFlags`
-infixl 5 .*., `commonFlags`
-
-class Eq a => Flags a where
-  -- | The empty set of flags.
-  noFlags :: a
-  -- | Union of two flag sets.
-  andFlags :: a -> a -> a
-  -- | Difference between two flag sets.
-  butFlags :: a -> a -> a
-  -- | Intersection of two flag sets.
-  commonFlags :: a -> a -> a
-  f1 `commonFlags` f2 = (f1 .+. f2) .-. (f1 .-. f2) .-. (f2 .-. f1)
+infixl 7 .-.
+infixl 6 .+.
+infixl 5 .*.
 
 -- | Alias for 'andFlags'.
 (.+.) :: Flags a => a -> a -> a
@@ -67,14 +58,6 @@ class Eq a => Flags a where
 -- | Alias for 'commonFlags'.
 (.*.) :: Flags a => a -> a -> a
 (.*.) = commonFlags
-
--- | Use this class when the set of flags is fixed and not likely
---   to change in the future.
-class Flags a => BoundedFlags a where
-  -- | Set of all flags.
-  allFlags :: a
-  -- | List the individual flags.
-  enumFlags :: a -> [a]
 
 -- | Shorthand for 'allFlags' '.-.' /x/.
 allBut :: BoundedFlags a => a -> a
