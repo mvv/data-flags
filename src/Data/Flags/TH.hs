@@ -50,9 +50,10 @@ dataBitsAsBoundedFlags typeName = do
 bitmaskWrapper :: String -- ^ Wrapping type name
                -> Name -- ^ Wrapped type name
                -> [Name] -- ^ Types to derive automatically
+               -> Bool -- ^ Whether to declare BoundedFlags instance
                -> [(String, Integer)] -- ^ Individual flags
                -> Q [Dec]
-bitmaskWrapper typeNameS wrappedName derives elems = do
+bitmaskWrapper typeNameS wrappedName derives bounded elems = do
   typeName <- return $ mkName typeNameS
   showE <- [| \flags -> $(stringE typeNameS) ++ " [" ++
                         (intercalate ", " $ map snd $
@@ -62,6 +63,10 @@ bitmaskWrapper typeNameS wrappedName derives elems = do
                                         tupE [varE $ mkName name,
                                               stringE name])
                                      elems)) ++ "]" |]
+  allFlagsE <- [| foldl andFlags noFlags
+                    $(listE $ map (varE . mkName . fst) elems) |]
+  enumFlagsE <- [| \flags -> filter ((noFlags /=) . commonFlags flags . fst) $
+                               $(listE $ map (varE . mkName . fst) elems) |]
   return $ [NewtypeD [] typeName []
                         (NormalC typeName [(NotStrict, ConT wrappedName)]) 
                         (union [''Eq, ''Flags] derives)] ++
@@ -73,6 +78,11 @@ bitmaskWrapper typeNameS wrappedName derives elems = do
                                             AppE (ConE typeName)
                                                  (LitE $ IntegerL value))
                                       []]]) elems) ++
+           (if bounded
+              then [inst ''BoundedFlags typeName
+                      [fun 'allFlags allFlagsE,
+                       fun 'enumFlags enumFlagsE]]
+              else []) ++
            (if (isJust $ find (''Show ==) derives)
               then []
               else [inst ''Show typeName [fun 'show showE]])
