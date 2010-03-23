@@ -42,10 +42,10 @@ import Foreign.C.Types (CChar, CSChar, CUChar, CShort, CUShort, CInt, CUInt,
 import Data.Flags.Base
 import Data.Flags.TH
 
-infixl 8 .<=., .>=., `containsAll`, .~., `containsSome`, ./~., `containsNone`
-infixl 7 .-.
+infixl 7 .*.
 infixl 6 .+.
-infixl 5 .*.
+infixl 5 .-.
+infix 4 .<=., .>=., `containsAll`, .~., `containsSome`, ./~., `containsNone`
 
 -- | Alias for 'andFlags'.
 (.+.) :: Flags a => a -> a -> a

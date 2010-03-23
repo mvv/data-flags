@@ -3,9 +3,9 @@ module Data.Flags.Base (
     BoundedFlags(..),
   ) where
 
-infixl 7 `butFlags`
+infixl 7 `commonFlags`
 infixl 6 `andFlags`
-infixl 5 `commonFlags`
+infixl 5 `butFlags`
 
 class Eq a => Flags a where
   -- | The empty set of flags.
