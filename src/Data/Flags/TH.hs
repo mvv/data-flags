@@ -17,7 +17,7 @@ import Control.Applicative ((<$>))
 import Data.Flags.Base
 
 inst :: Name -> Name -> [Dec] -> Dec
-inst name typeName = InstanceD [] (AppT (ConT name) (ConT typeName))
+inst className typeName = InstanceD [] (AppT (ConT className) (ConT typeName))
 
 fun :: Name -> Exp -> Dec
 fun name expr = FunD name [Clause [] (NormalB expr) []]
