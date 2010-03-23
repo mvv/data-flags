@@ -3,12 +3,15 @@
 -- | Template Haskell utils for declaring flags instances.
 module Data.Flags.TH (
     dataBitsAsFlags,
-    dataBitsAsBoundedFlags
+    dataBitsAsBoundedFlags,
+    bitmaskWrapper
   ) where
 
 import Language.Haskell.TH
 
 import Data.Bits (Bits(..))
+import Data.Maybe (isJust)
+import Data.List (find, intercalate)
 import Control.Applicative ((<$>))
 
 inst :: String -> Name -> [Dec] -> Dec
@@ -41,3 +44,37 @@ dataBitsAsBoundedFlags typeName = do
          [fun "allFlags" allE,
           fun "enumFlags" enumE]]) <$> dataBitsAsFlags typeName
   
+bitmaskWrapper :: String -- ^ Wrapping type name
+               -> Name -- ^ Wrapped type name
+               -> [Name] -- ^ Types to derive automatically
+               -> [(String, Integer)] -- ^ Individual flags
+               -> Q [Dec]
+bitmaskWrapper typeNameS wrappedName derives elems = do
+  typeName <- return $ mkName typeNameS
+  showE <- [| \flags -> $(stringE typeNameS) ++ " [" ++
+                        (intercalate ", " $ map snd $
+                           filter (\(flag, _) ->
+                                     $(varE $ mkName "containsAll")
+                                       flags flag) $
+                             $(listE $
+                                 map (\(name, _) ->
+                                        tupE [varE $ mkName name,
+                                              stringE name])
+                                     elems)) ++ "]" |]
+  
+  return $ [NewtypeD [] typeName []
+                        (NormalC typeName [(NotStrict, ConT wrappedName)]) 
+                        (mkName "Eq" : mkName "Flags" : derives)] ++
+           (concatMap (\(nameS, value) ->
+                         let name = mkName nameS in 
+                           [SigD name (ConT typeName),
+                            FunD name
+                              [Clause [] (NormalB $
+                                            AppE (ConE typeName)
+                                                 (LitE $ IntegerL value))
+                                      []]]) elems) ++
+           (if (isJust $ find (("Show" ==) . show) derives)
+              then []
+              else [inst "Show" typeName
+                      [fun "show" showE]])
+
