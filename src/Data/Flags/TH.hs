@@ -22,7 +22,7 @@ inst className typeName = InstanceD [] (AppT (ConT className) (ConT typeName))
 fun :: Name -> Exp -> Dec
 fun name expr = FunD name [Clause [] (NormalB expr) []]
 
--- | Produces a 'Data.Flags.Flags' instance declaration for the specified
+-- | Produces 'Data.Flags.Base.Flags' instance declaration for the specified
 --   instance of 'Data.Bits.Bits'.
 dataBitsAsFlags :: Name -> Q [Dec]
 dataBitsAsFlags typeName = do
@@ -36,8 +36,8 @@ dataBitsAsFlags typeName = do
              fun 'commonFlags intersectionE,
              fun 'butFlags differenceE]]
 
--- | Produces 'Data.Flags.Flags' and 'Data.Flags.BoundedFlags' instances
---   declarations for the specified instance of 'Data.Bits.Bits'.
+-- | Produces 'Data.Flags.Base.Flags' and 'Data.Flags.Base.BoundedFlags'
+--   instances declarations for the specified instance of 'Data.Bits.Bits'.
 dataBitsAsBoundedFlags :: Name -> Q [Dec]
 dataBitsAsBoundedFlags typeName = do
   allE <- [| fromInteger (-1) |]
