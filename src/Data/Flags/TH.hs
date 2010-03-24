@@ -4,7 +4,8 @@
 module Data.Flags.TH (
     dataBitsAsFlags,
     dataBitsAsBoundedFlags,
-    bitmaskWrapper
+    bitmaskWrapper,
+    enumADT
   ) where
 
 import Language.Haskell.TH
@@ -12,6 +13,8 @@ import Language.Haskell.TH
 import Data.Bits (Bits(..))
 import Data.Maybe (isJust)
 import Data.List (find, union, intercalate)
+import Foreign.Storable (Storable(..))
+import Foreign.Ptr (Ptr, castPtr)
 import Control.Applicative ((<$>))
 
 import Data.Flags.Base
@@ -89,4 +92,41 @@ bitmaskWrapper typeNameS wrappedName derives elems = do
            (if (isJust $ find (''Show ==) derives)
               then []
               else [inst ''Show typeName [fun 'show showE]])
+
+-- | Declare an ADT with the specified constructors and make it an instance
+--   of 'Eq', 'Ord', 'Show' and 'Foreign.Storable.Storable'.
+enumADT :: String -- ^ Type name.
+        -> Name -- Numeric type name.
+        -> [(String, Integer)] -- ^ Enumeration elements.
+        -> Q [Dec]
+enumADT typeNameS numName elems = do
+  let typeName = mkName typeNameS
+      wrap i = caseE (varE i) $
+                 (map (\(name, value) ->
+                         match (litP $ IntegerL value)
+                               (normalB $ appE (conE 'Just)
+                                               (conE $ mkName name))
+                               []) elems) ++
+                 [match wildP (normalB $ conE 'Nothing) []]
+      unwrap w = caseE (varE w)
+                   (map (\(name, value) ->
+                           match (conP (mkName name) [])
+                                 (normalB $ litE $ IntegerL value)
+                                 []) elems) in do
+    alignmentE <- [| \_ -> alignment (undefined :: $(conT numName)) |]
+    sizeOfE <- [| \_ -> sizeOf (undefined :: $(conT numName)) |]
+    peekE <- [| \p -> do
+                  i <- peek (castPtr p :: Ptr $(conT numName))
+                  case $(wrap 'i) of
+                    Just w -> return w
+                    Nothing -> fail $ "Invalid value for " ++ typeNameS |]
+    pokeE <- [| \p -> \v -> poke (castPtr p :: Ptr $(conT numName))
+                                 $(unwrap 'v) |]
+    return [DataD [] typeName [] (map ((`NormalC` []) . mkName . fst) elems)
+                  [''Eq, ''Ord, ''Show],
+            inst ''Storable typeName
+              [fun 'alignment alignmentE,
+               fun 'sizeOf sizeOfE,
+               fun 'peek peekE,
+               fun 'poke pokeE]]
 
