@@ -48,19 +48,17 @@ dataBitsAsBoundedFlags typeName = do
           fun 'enumFlags enumFlagsE]]) <$> dataBitsAsFlags typeName
   
 -- | Declare a newtype wrapper around the specified integral type and make
---   the wrapper an instance of 'Data.Flags.Base.Flags' (and optionally
---   'Data.Flags.Base.BoundedFlags'). For each individual flag declare
---   a constant.  If a 'Show' instance wasn't requested for automatic
---   derivation, declare one with
+--   the wrapper an instance of 'Data.Flags.Base.BoundedFlags'. For each
+--   individual flag declare a constant. If a 'Show' instance wasn't requested
+--   for automatic derivation, declare one with
 --
 --   > show flags = "WrappingTypeName [IndividualFlags in flags]"
 bitmaskWrapper :: String -- ^ Wrapping type name.
                -> Name -- ^ Wrapped type name.
                -> [Name] -- ^ Types to derive automatically.
-               -> Bool -- ^ Whether to declare BoundedFlags instance.
                -> [(String, Integer)] -- ^ Individual flags.
                -> Q [Dec]
-bitmaskWrapper typeNameS wrappedName derives bounded elems = do
+bitmaskWrapper typeNameS wrappedName derives elems = do
   typeName <- return $ mkName typeNameS
   showE <- [| \flags -> $(stringE $ typeNameS ++ " [") ++
                         (intercalate ", " $ map snd $
@@ -85,11 +83,9 @@ bitmaskWrapper typeNameS wrappedName derives bounded elems = do
                                             AppE (ConE typeName)
                                                  (LitE $ IntegerL value))
                                       []]]) elems) ++
-           (if bounded
-              then [inst ''BoundedFlags typeName
-                      [fun 'allFlags allFlagsE,
-                       fun 'enumFlags enumFlagsE]]
-              else []) ++
+           [inst ''BoundedFlags typeName
+              [fun 'allFlags allFlagsE,
+               fun 'enumFlags enumFlagsE]] ++
            (if (isJust $ find (''Show ==) derives)
               then []
               else [inst ''Show typeName [fun 'show showE]])
