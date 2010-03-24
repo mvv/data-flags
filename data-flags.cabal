@@ -1,5 +1,5 @@
 Name: data-flags
-Version: 0.0.2
+Version: 0.0.3
 Category: Data
 Stability: experimental
 Synopsis: A package for working with bit masks and flags in general.
