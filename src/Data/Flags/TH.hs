@@ -51,9 +51,9 @@ dataBitsAsBoundedFlags typeName = do
           fun 'enumFlags enumFlagsE]]) <$> dataBitsAsFlags typeName
   
 -- | Declare a newtype wrapper around the specified integral type and make
---   the wrapper an instance of 'Data.Flags.Base.BoundedFlags'. For each
---   individual flag declare a constant. If a 'Show' instance wasn't requested
---   for automatic derivation, declare one with
+--   it an instance of 'Data.Flags.Base.BoundedFlags'. For each individual
+--   flag declare a constant. If a 'Show' instance wasn't requested for
+--   automatic derivation, declare one with
 --
 --   > show flags = "WrappingTypeName [IndividualFlags in flags]"
 bitmaskWrapper :: String -- ^ Wrapping type name.
