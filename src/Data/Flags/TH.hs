@@ -70,7 +70,7 @@ bitmaskWrapper typeNameS wrappedName derives elems = do
                                      elems)) ++ "]" |]
   allFlagsE <- [| foldl andFlags noFlags
                     $(listE $ map (varE . mkName . fst) elems) |]
-  enumFlagsE <- [| \flags -> filter ((noFlags /=) . commonFlags flags . fst) $
+  enumFlagsE <- [| \flags -> filter ((noFlags /=) . commonFlags flags) $
                                $(listE $ map (varE . mkName . fst) elems) |]
   return $ [NewtypeD [] typeName []
                         (NormalC typeName [(NotStrict, ConT wrappedName)]) 
