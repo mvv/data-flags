@@ -18,7 +18,6 @@ Build-Type: Simple
 
 Library
   Build-Depends: base < 5, template-haskell
-  Extensions: TemplateHaskell
   Hs-Source-Dirs: src
   GHC-Options: -Wall
   Exposed-Modules:
