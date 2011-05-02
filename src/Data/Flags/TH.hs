@@ -29,7 +29,7 @@ fun name expr = FunD name [Clause [] (NormalB expr) []]
 --   instance of 'Data.Bits.Bits'.
 dataBitsAsFlags :: Name -> Q [Dec]
 dataBitsAsFlags typeName = do
-  noFlagsE <- [| fromInteger 0 |]
+  noFlagsE <- appE (varE 'fromInteger) (litE $ IntegerL 0)
   andFlagsE <- [| (.|.) |]
   commonFlagsE <- [| (.&.) |] 
   butFlagsE <- [| \x -> \y -> x .&. (complement y) |]
@@ -43,7 +43,7 @@ dataBitsAsFlags typeName = do
 --   instances declarations for the specified instance of 'Data.Bits.Bits'.
 dataBitsAsBoundedFlags :: Name -> Q [Dec]
 dataBitsAsBoundedFlags typeName = do
-  allFlagsE <- [| fromInteger (-1) |]
+  allFlagsE <- appE (varE 'fromInteger) (litE $ IntegerL (-1))
   enumFlagsE <- [| \x -> map (setBit 0) $
                            filter (testBit x) [0 .. bitSize x - 1] |]
   (++ [inst ''BoundedFlags typeName
