@@ -6,5 +6,5 @@ standard numeric types viewed as bit masks.
 Installation
 ------------
 The usual:
-	$ cabal install
 
+	$ cabal install
