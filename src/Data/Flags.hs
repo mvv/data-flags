@@ -1,3 +1,4 @@
+{-# LANGUAGE UnicodeSyntax #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_ghc -fno-warn-orphans #-}
 
@@ -30,16 +31,16 @@
 --   And then use it like this:
 --
 -- > f $ myFlag1 .+. myFlag3
-module Data.Flags (
-    Flags(..),
-    (.+.), (.-.), (.*.),
+module Data.Flags
+  ( Flags(..)
+  , (.+.), (.-.), (.*.)
 
-    BoundedFlags(..),
-    allBut,
+  , BoundedFlags(..)
+  , allBut
 
-    containsAll, (.<=.), (.>=.),
-    containsSome, (.~.),
-    containsNone, (./~.),
+  , containsAll, (.<=.), (.>=.)
+  , containsSome, (.~.)
+  , containsNone, (./~.)
   ) where
 
 import Data.Bits ()
@@ -58,47 +59,47 @@ infixl 5 .-.
 infix 4 .<=., .>=., `containsAll`, .~., `containsSome`, ./~., `containsNone`
 
 -- | Alias for 'andFlags'.
-(.+.) :: Flags a => a -> a -> a
+(.+.) ∷ Flags α ⇒ α → α → α
 (.+.) = andFlags
 
 -- | Alias for 'butFlags'.
-(.-.) :: Flags a => a -> a -> a
+(.-.) ∷ Flags α ⇒ α → α → α
 (.-.) = butFlags
 
 -- | Alias for 'commonFlags'.
-(.*.) :: Flags a => a -> a -> a
+(.*.) ∷ Flags α ⇒ α → α → α
 (.*.) = commonFlags
 
 -- | Shorthand for 'allFlags' '.-.' /x/.
-allBut :: BoundedFlags a => a -> a
+allBut ∷ BoundedFlags α ⇒ α → α
 allBut = (allFlags .-.)
 
 -- | Test if the first flag set contains all flags from the second.
-containsAll :: Flags a => a -> a -> Bool
+containsAll ∷ Flags α ⇒ α → α → Bool
 containsAll flags subflags = flags .*. subflags == subflags
 
 -- | Alias for 'containsAll'.
-(.>=.) :: Flags a => a -> a -> Bool
+(.>=.) ∷ Flags α ⇒ α → α → Bool
 (.>=.) = containsAll
 
 -- | Shorthand for 'flip' 'containsAll'.
-(.<=.) :: Flags a => a -> a -> Bool
+(.<=.) ∷ Flags α ⇒ α → α → Bool
 (.<=.) = flip containsAll
 
 -- | Test if two flag sets intersect.
-containsSome :: Flags a => a -> a -> Bool
+containsSome ∷ Flags α ⇒ α → α → Bool
 containsSome flags subflags = flags .*. subflags /= noFlags
 
 -- | Alias for 'containsSome'.
-(.~.) :: Flags a => a -> a -> Bool
+(.~.) ∷ Flags α ⇒ α → α → Bool
 (.~.) = containsSome
 
 -- | Test if two flag sets do not intersect.
-containsNone :: Flags a => a -> a -> Bool
+containsNone ∷ Flags α ⇒ α → α → Bool
 containsNone flags subflags = flags .*. subflags == noFlags
 
 -- | Alias for 'containsNone'.
-(./~.) :: Flags a => a -> a -> Bool
+(./~.) ∷ Flags α ⇒ α → α → Bool
 (./~.) = containsNone
 
 $(dataBitsAsFlags ''Integer)
@@ -125,4 +126,3 @@ $(dataBitsAsBoundedFlags ''CLong)
 $(dataBitsAsBoundedFlags ''CULong)
 $(dataBitsAsBoundedFlags ''CLLong)
 $(dataBitsAsBoundedFlags ''CULLong)
-
