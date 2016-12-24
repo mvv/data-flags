@@ -16,6 +16,12 @@ Copyright: 2010 Mikhail Vorozhtsov <mikhail.vorozhtsov@gmail.com>
 License: BSD3
 License-File: LICENSE
 
+Extra-Source-Files:
+  README.md
+
+Tested-With: GHC==7.0.4, GHC==7.2.2, GHC==7.4.2, GHC==7.6.3, GHC==7.8.4,
+             GHC==7.10.3, GHC==8.0.1
+
 Cabal-Version: >= 1.6.0
 Build-Type: Simple
 
@@ -24,7 +30,8 @@ Source-Repository head
   Location: https://github.com/mvv/data-flags.git
 
 Library
-  Build-Depends: base < 5, template-haskell
+  Build-Depends: base >= 4 && < 5
+               , template-haskell
   Hs-Source-Dirs: src
   GHC-Options: -Wall
   Exposed-Modules:
