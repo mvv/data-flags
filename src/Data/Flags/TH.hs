@@ -100,7 +100,7 @@ bitmaskWrapper typeNameS wrappedName derives elems = do
                       Nothing
 #endif
                       (NormalC typeName [(strictness, ConT wrappedName)])
-#if MIN_VERSION_template_haskell(2,10,0)
+#if MIN_VERSION_template_haskell(2,11,0)
                       . fmap ConT $
 #endif
                       (union [''Eq, ''Flags] derives)
@@ -154,7 +154,7 @@ enumADT typeNameS numName elems = do
                   Nothing
 #endif
                   (map ((`NormalC` []) . mkName . fst) elems)
-#if MIN_VERSION_template_haskell(2,10,0)
+#if MIN_VERSION_template_haskell(2,11,0)
                   . fmap ConT $
 #endif
                   [''Eq, ''Ord, ''Show],
