@@ -159,7 +159,7 @@ enumADT typeNameS numName elems = do
 #endif
                   (map ((`NormalC` []) . mkName . fst) elems)
 #if MIN_VERSION_template_haskell(2,11,0)
-# if MIN_VERSION_template_haskell(2,11,0)
+# if MIN_VERSION_template_haskell(2,12,0)
                   . pure
                   . DerivClause Nothing
 # endif
